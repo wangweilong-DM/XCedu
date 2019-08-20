@@ -79,5 +79,18 @@ public class CmsPageRepostryTest {
         System.out.println(content);
     }
 
+    @Test
+    public void testfindBySiteId(){
+       List< CmsPage> siteId = cmsPageRepostry.findBySiteId("5a751fab6abb5044e0d19ea1");
+       System.out.println(siteId);
+
+    }
+
+    @Test
+    public void testfideBy(){
+        CmsPage cmsPage = cmsPageRepostry.findByPageNameAndSiteIdAndPageWebPath(
+                "index.html", "5a751fab6abb5044e0d19ea1", "/index.html");
+        System.out.println(cmsPage);
+    }
 
 }

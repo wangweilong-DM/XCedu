@@ -3,6 +3,7 @@ package com.xuecheng.manage_cms.controller;
 import com.xuecheng.api.cms.CmsPageControllerApi;
 import com.xuecheng.framework.domain.cms.CmsPage;
 import com.xuecheng.framework.domain.cms.request.QueryPageRequest;
+import com.xuecheng.framework.domain.cms.response.CmsPageResult;
 import com.xuecheng.framework.model.response.CommonCode;
 import com.xuecheng.framework.model.response.QueryResponseResult;
 import com.xuecheng.framework.model.response.QueryResult;
@@ -30,19 +31,21 @@ public class CmsPageController implements CmsPageControllerApi {
     @GetMapping("/list/{page}/{size}")
     public QueryResponseResult findList(@PathVariable("page") int page, @PathVariable("size") int size, QueryPageRequest queryPageRequest) {
         // QueryResponseResult queryResponseResult1 = new QueryResponseResult(CommonCode.SUCCESS);
-/*        //暂时采用测试数据，测试接口是否可以正常运行
-        QueryResult queryResult = new QueryResult();
-        queryResult.setTotal(2);
-        List list = new ArrayList();
-        CmsPage cmsPage = new CmsPage();
-        cmsPage.setPageName("测试");
-        list.add(cmsPage);
-        queryResult.setList(list);
-        QueryResponseResult queryResponseResult = new QueryResponseResult(CommonCode.SUCCESS,queryResult);
-        return queryResponseResult;*/
-
-
 
         return pageService.findList(page, size, queryPageRequest);
     }
+
+    @Override
+    @GetMapping("/list/query")
+    public QueryResponseResult findAll() {
+
+        return pageService.findAll();
+    }
+
+    @Override
+    public CmsPageResult addCmsPage(CmsPage cmsPage) {
+        return pageService.addCmsPage(cmsPage);
+    }
+
+
 }

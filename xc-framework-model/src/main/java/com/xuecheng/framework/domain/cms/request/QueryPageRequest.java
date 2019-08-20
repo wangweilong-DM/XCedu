@@ -19,7 +19,7 @@ public class QueryPageRequest {
     private String pageName;
 
     //别名
-    private String pageAlias;
+    private String pageAliase;
 
     //模板id
     private String templateId;
