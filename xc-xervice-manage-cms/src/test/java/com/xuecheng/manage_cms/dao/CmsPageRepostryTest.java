@@ -8,6 +8,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.domain.*;
 import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.util.StringUtils;
 
 import java.util.List;
 import java.util.Optional;
@@ -93,4 +94,25 @@ public class CmsPageRepostryTest {
         System.out.println(cmsPage);
     }
 
+    @Test
+    public  void testfindByid1(){
+        Optional<CmsPage> optional = cmsPageRepostry.findById("5a754adf6abb500ad05688d9");
+        if (!StringUtils.isEmpty(optional)){
+            CmsPage cmsPage = optional.get();
+            System.out.println(cmsPage);
+        }
+
+    }
+
+    @Test
+    public void testupdate(){
+        CmsPage cmsPage =new CmsPage();
+        Optional<CmsPage> optional = cmsPageRepostry.findById("5d5cd6aba8d3fb04241db8e3");
+        if (!StringUtils.isEmpty(optional)){
+            cmsPage = optional.get();
+        }
+        cmsPage.setPageName("ttt");
+        CmsPage save = cmsPageRepostry.save(cmsPage);
+        System.out.println(save);
+    }
 }
