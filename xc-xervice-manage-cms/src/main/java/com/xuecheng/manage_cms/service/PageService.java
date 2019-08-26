@@ -51,6 +51,12 @@ public class PageService {
             exampleMatcher = exampleMatcher.withMatcher(queryPageRequest.getPageAliase(), ExampleMatcher.GenericPropertyMatchers.contains());
         }
 
+      /*  if (!StringUtils.isEmpty(queryPageRequest.getPageName())) {
+            cmsPage.setPageName(queryPageRequest.getPageName());
+            exampleMatcher.withMatcher(queryPageRequest.getPageName(),ExampleMatcher.GenericPropertyMatchers.contains());
+//            exampleMatcher = exampleMatcher.withMatcher(queryPageRequest.getPageAliase(), ExampleMatcher.GenericPropertyMatchers.contains());
+        }*/
+
         //设置条件值
         if (!StringUtils.isEmpty(queryPageRequest.getSiteId())) {
             cmsPage.setSiteId(queryPageRequest.getSiteId());
@@ -58,9 +64,11 @@ public class PageService {
         if (!StringUtils.isEmpty(queryPageRequest.getTemplateId())) {
             cmsPage.setTemplateId(queryPageRequest.getTemplateId());
         }
+        if (!StringUtils.isEmpty(queryPageRequest.getPageName())) {
+            cmsPage.setPageName(queryPageRequest.getPageName());
+        }
 
         Example<CmsPage> example = Example.of(cmsPage, exampleMatcher);
-
 
         //分页参数
         if (page <= 0) {
@@ -102,9 +110,7 @@ public class PageService {
 //            newsiteId = siteid;
             if (newsiteId != siteid) {
                 newsiteId = siteid;
-
             }
-
         }
         cmsSite.setSiteId(newsiteId);
         cmsSite.setSiteName("门户主站");
@@ -165,6 +171,8 @@ public class PageService {
         return null;
     }
 
+
+
     /**
      * 修改页面
      *
@@ -216,4 +224,5 @@ public class PageService {
         }
        return new ResponseResult(CommonCode.FAIL);
     }
+
 }

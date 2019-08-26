@@ -28,6 +28,7 @@ public interface CmsPageControllerApi {
 
 
     //页面查询所有siteId
+    @ApiOperation("页面查询所有siteId")
     public QueryResponseResult findAll();
 
     //新增页面
