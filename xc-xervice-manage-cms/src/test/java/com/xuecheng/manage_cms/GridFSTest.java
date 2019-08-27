@@ -38,7 +38,7 @@ public class GridFSTest {
     @Test
     public void testStore() throws FileNotFoundException {
         //定义file
-        File file =new File("d:/index_banner.ftl");
+        File file =new File("G:/百度网盘/JAVA/黑马57/19学成在线/day04 页面静态化/代码/index_banner2.ftl");
         //定义fileInputStream
         FileInputStream fileInputStream = new FileInputStream(file);
         ObjectId objectId = gridFsTemplate.store(fileInputStream, "index_banner.ftl");
@@ -49,7 +49,7 @@ public class GridFSTest {
     @Test
     public void queryFile() throws IOException {
         //根据文件id查询文件
-        GridFSFile gridFSFile = gridFsTemplate.findOne(Query.query(Criteria.where("_id").is("5b9cb02435794805b43b2b04")));
+        GridFSFile gridFSFile = gridFsTemplate.findOne(Query.query(Criteria.where("_id").is("5d63bdcba8d3fb226837e953")));
 
 
         //打开一个下载流对象

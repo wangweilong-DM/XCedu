@@ -190,8 +190,9 @@ public class PageService {
             byId.setPageName(cmsPage.getPageName());
             byId.setPageWebPath(cmsPage.getPageWebPath());
             byId.setPagePhysicalPath(cmsPage.getPagePhysicalPath());
+            byId.setDataUrl(cmsPage.getDataUrl());
         }
-            //byId.setDataUrl(cmsPage.getDataUrl());
+
            // byId.setPageCreateTime(cmsPage.getPageCreateTime());
            // byId.setPageType(cmsPage.getPageType());
             //提交修改

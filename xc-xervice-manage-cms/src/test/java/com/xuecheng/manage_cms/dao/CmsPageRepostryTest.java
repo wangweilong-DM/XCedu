@@ -1,6 +1,7 @@
 package com.xuecheng.manage_cms.dao;
 
 import com.xuecheng.framework.domain.cms.CmsPage;
+import com.xuecheng.manage_cms.service.ConfigService;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,16 +22,17 @@ import java.util.Optional;
 @RunWith(SpringRunner.class)
 public class CmsPageRepostryTest {
 
-    @Autowired
-    MongoRepository mongoRepository;
 
     @Autowired
     CmsPageRepostry cmsPageRepostry;
 
+    @Autowired
+    ConfigService configService;
+
     @Test
     public void testFindAll(){
 
-        List all = mongoRepository.findAll();
+        List all = cmsPageRepostry.findAll();
         System.out.println(all);
     }
 
@@ -39,18 +41,18 @@ public class CmsPageRepostryTest {
         int page = 0;
         int size = 10;
         Pageable pageable = PageRequest.of(page,size);
-        Page<CmsPage> all = mongoRepository.findAll(pageable);
+        Page<CmsPage> all = cmsPageRepostry.findAll(pageable);
 
         System.out.println(all);
     }
 
     @Test
     public void testUpadte(){
-        Optional<CmsPage> byId = mongoRepository.findById("5a795ac7dd573c04508f3a56");
+        Optional<CmsPage> byId = cmsPageRepostry.findById("5a795ac7dd573c04508f3a56");
         if (byId.isPresent()){
             CmsPage cmsPage = byId.get();
             cmsPage.setPageAliase("test001");
-            Object save = mongoRepository.save(cmsPage);
+            Object save = cmsPageRepostry.save(cmsPage);
         }
     }
 
@@ -114,5 +116,11 @@ public class CmsPageRepostryTest {
         cmsPage.setPageName("ttt");
         CmsPage save = cmsPageRepostry.save(cmsPage);
         System.out.println(save);
+    }
+
+    @Test
+    public void testGetPageHtml(){
+        String pageHtml = configService.getPageHtml("5d5c93bca8d3fb36dcd604e2");
+        System.out.println(pageHtml);
     }
 }

@@ -24,7 +24,9 @@ public class RestTemplateTest {
 
     @Test
     public void testRestTemplate(){
-        ResponseEntity<Map> template = restTemplate.getForEntity("http://localhost:31001/cms/config/get/5a791725dd573c3574ee333f", Map.class);
-        System.out.println(template);
+        ResponseEntity<Map> template = restTemplate.
+                getForEntity("http://localhost:31001/cms/config/getmodel/5a791725dd573c3574ee333f", Map.class);
+        Map body = template.getBody();
+        System.out.println(body);
     }
 }
