@@ -1,6 +1,7 @@
 package com.xuecheng.manage_cms.dao;
 
 import com.xuecheng.framework.domain.cms.CmsPage;
+import com.xuecheng.framework.domain.cms.CmsSite;
 import com.xuecheng.manage_cms.service.ConfigService;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -28,6 +29,9 @@ public class CmsPageRepostryTest {
 
     @Autowired
     ConfigService configService;
+
+    @Autowired
+    CmsSiteRepostry cmsSiteRepostry;
 
     @Test
     public void testFindAll(){
@@ -122,5 +126,16 @@ public class CmsPageRepostryTest {
     public void testGetPageHtml(){
         String pageHtml = configService.getPageHtml("5d5c93bca8d3fb36dcd604e2");
         System.out.println(pageHtml);
+    }
+
+    @Test
+    public void  testSide(){
+        Optional<CmsSite> optional = cmsSiteRepostry.findById("5a751fab6abb5044e0d19ea1");
+        if (optional.isPresent()){
+            CmsSite cmsSite = optional.get();
+            cmsSite.setSitePhysicalPath("cmsfiles");
+            CmsSite save = cmsSiteRepostry.save(cmsSite);
+        }
+
     }
 }

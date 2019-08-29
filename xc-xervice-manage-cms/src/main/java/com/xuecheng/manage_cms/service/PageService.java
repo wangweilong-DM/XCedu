@@ -1,5 +1,7 @@
 package com.xuecheng.manage_cms.service;
 
+import com.alibaba.fastjson.JSON;
+import com.mongodb.gridfs.GridFS;
 import com.xuecheng.framework.domain.cms.CmsPage;
 import com.xuecheng.framework.domain.cms.CmsSite;
 import com.xuecheng.framework.domain.cms.request.QueryPageRequest;
@@ -7,13 +9,23 @@ import com.xuecheng.framework.domain.cms.response.CmsCode;
 import com.xuecheng.framework.domain.cms.response.CmsPageResult;
 import com.xuecheng.framework.exception.ExceptionCast;
 import com.xuecheng.framework.model.response.*;
+import com.xuecheng.manage_cms.config.RabbitmqConfig;
 import com.xuecheng.manage_cms.dao.CmsPageRepostry;
+import org.apache.commons.io.IOUtils;
 import org.bson.types.Code;
+import org.bson.types.ObjectId;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.*;
+import org.springframework.data.mongodb.core.query.Criteria;
+import org.springframework.data.mongodb.core.query.Query;
+import org.springframework.data.mongodb.gridfs.GridFsTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.*;
 
 
@@ -29,6 +41,15 @@ public class PageService {
 
     @Autowired
     CmsPageRepostry cmsPageRepostry;
+
+    @Autowired
+    ConfigService configService;
+
+    @Autowired
+    GridFsTemplate gridFsTemplate;
+
+    @Autowired
+    RabbitTemplate rabbitTemplate;
 
     /**
      * 自定义查询页面方法
@@ -224,6 +245,69 @@ public class PageService {
             return responseResult;
         }
        return new ResponseResult(CommonCode.FAIL);
+    }
+
+    public ResponseResult post(String pageId){
+//1.执行页面静态化
+        String pageHtml = configService.getPageHtml(pageId);
+        // 2.将页面静态化文件存储到GridFs中
+        CmsPage cmsPage = savaHtml(pageId, pageHtml);
+        //3.向MQ发送消息
+        sendPostPage(pageId);
+
+        return new ResponseResult(CommonCode.SUCCESS);
+
+    }
+
+    //保存静态文件内容
+    private CmsPage savaHtml(String pageId , String html){
+        //1.查询页面
+        Optional<CmsPage> optional = cmsPageRepostry.findById(pageId);
+        if (!optional.isPresent()){
+            ExceptionCast.cast(CmsCode.CMS_PAGE_NOTEXISTS);
+        }
+        CmsPage cmsPage = optional.get();
+        //2.存之前先删除页面
+        String fileId = cmsPage.getHtmlFileId();
+        if (StringUtils.isEmpty(fileId)){
+
+        }else {
+            gridFsTemplate.delete(Query.query(Criteria.where("_id").is(fileId)));
+        }
+        //3.保存html文件到gridfs
+        InputStream inputStream = null;
+        ObjectId objectId = null;
+        try {
+            inputStream = IOUtils.toInputStream(html,"utf-8");
+            objectId = gridFsTemplate.store(inputStream, cmsPage.getPageName());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        //4.将文件存储到cmspage中
+        cmsPage.setHtmlFileId(objectId.toHexString());
+        cmsPageRepostry.save(cmsPage);
+        return cmsPage;
+    }
+
+    //向mq发送消息
+    private void sendPostPage(String pageId){
+
+        //得到页面信息
+        Optional<CmsPage> optional = cmsPageRepostry.findById(pageId);
+        if (!optional.isPresent()){
+            ExceptionCast.cast(CmsCode.CMS_PAGE_NOTEXISTS);
+        }
+        CmsPage cmsPage = optional.get();
+
+        //获得站点id，即routingKey
+        String siteId = cmsPage.getSiteId();
+
+        //拼装消息对象
+        Map<String,String> map = new HashMap<>();
+        map.put("pageId",pageId);
+        //转成json串
+        String jsonString = JSON.toJSONString(map);
+        rabbitTemplate.convertAndSend(RabbitmqConfig.EX_ROUTING_CMS_POSTPAGE,siteId,jsonString);
     }
 
 }
