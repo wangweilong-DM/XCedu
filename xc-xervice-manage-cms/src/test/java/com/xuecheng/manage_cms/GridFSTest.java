@@ -49,9 +49,7 @@ public class GridFSTest {
     @Test
     public void queryFile() throws IOException {
         //根据文件id查询文件
-        GridFSFile gridFSFile = gridFsTemplate.findOne(Query.query(Criteria.where("_id").is("5d63bdcba8d3fb226837e953")));
-
-
+        GridFSFile gridFSFile = gridFsTemplate.findOne(Query.query(Criteria.where("_id").is("5d63c2c3a8d3fb3910c0eced")));
         //打开一个下载流对象
         GridFSDownloadStream gridFSDownloadStream = gridFSBucket.openDownloadStream(gridFSFile.getObjectId());
         //创建GridFsResource对象，获取流
