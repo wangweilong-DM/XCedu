@@ -3,6 +3,7 @@ package com.xuecheng.manage_course.service;
 import com.github.pagehelper.Page;
 import com.github.pagehelper.PageHelper;
 import com.xuecheng.framework.domain.course.CourseBase;
+import com.xuecheng.framework.domain.course.CourseMarket;
 import com.xuecheng.framework.domain.course.Teachplan;
 import com.xuecheng.framework.domain.course.ext.CategoryNode;
 import com.xuecheng.framework.domain.course.ext.TeachplanNode;
@@ -15,6 +16,7 @@ import com.xuecheng.framework.model.response.QueryResponseResult;
 import com.xuecheng.framework.model.response.QueryResult;
 import com.xuecheng.framework.model.response.ResponseResult;
 import com.xuecheng.manage_course.dao.*;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.domain.EntityScan;
 import org.springframework.stereotype.Service;
@@ -47,6 +49,12 @@ public class CourseService {
 
     @Autowired
     CategoryMapper categoryMapper;
+
+    @Autowired
+    CourseMarketRepository courseMarketRepository;
+
+    @Autowired
+    CourseMarketMapper courseMarketMapper;
 
     /**
      * 课程计划查询
@@ -150,8 +158,10 @@ public class CourseService {
         PageHelper.startPage(page, size);
         Page<CourseBase> courseList = courseMapper.findCourseList();
         List<CourseBase> result = courseList.getResult();
+        long total = courseList.getTotal();
         QueryResult queryResult = new QueryResult();
         queryResult.setList(result);
+        queryResult.setTotal(total);
 //        queryResult.setTotal();
         QueryResponseResult queryResponseResult = new QueryResponseResult(CommonCode.SUCCESS, queryResult);
 
@@ -187,6 +197,7 @@ public class CourseService {
         return courseBase;
     }
 
+    @Transactional
     public ResponseResult updateCourseBase(String id, CourseBase courseBase) {
 
        /* if (id == null || courseBase == null) {
@@ -210,6 +221,45 @@ public class CourseService {
 
         ResponseResult responseResult = new ResponseResult(CommonCode.SUCCESS);
 
+        return responseResult;
+    }
+
+    @Transactional
+    public CourseMarket getCourseMarketById(String courseId) {
+        if (StringUtils.isEmpty(courseId)) {
+            ExceptionCast.cast(CourseCode.COURSE_PUBLISH_COURSEIDISNULL);
+        }
+        Optional<CourseMarket> optional = courseMarketRepository.findById(courseId);
+        if (!optional.isPresent()) {
+            return null;
+        }
+        CourseMarket courseMarket = optional.get();
+
+        return courseMarket;
+    }
+
+
+    @Transactional
+    //修改课程营销信息
+    public ResponseResult updateCourseMarket(String courseId, CourseMarket courseMarket) {
+        CourseMarket courseMarketById = getCourseMarketById(courseId);
+        if (courseMarketById != null) {
+            courseMarketById.setCharge(courseMarket.getCharge());
+            courseMarketById.setPrice(courseMarket.getPrice());
+            courseMarketById.setValid(courseMarket.getValid());
+            courseMarketById.setEndTime(courseMarket.getEndTime());
+//            courseMarketById.setPrice_old(courseMarket.getPrice_old());
+            courseMarketById.setQq(courseMarket.getQq());
+            courseMarketById.setStartTime(courseMarket.getStartTime());
+            courseMarketRepository.save(courseMarketById);
+        }else {
+            courseMarketById = new CourseMarket();
+            BeanUtils.copyProperties(courseMarket,courseMarketById);
+            courseMarketById.setId(courseId);
+            courseMarketRepository.save(courseMarketById);
+        }
+
+        ResponseResult responseResult = new ResponseResult(CommonCode.SUCCESS);
         return responseResult;
     }
 }

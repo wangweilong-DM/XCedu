@@ -3,6 +3,7 @@ package com.xuecheng.manage_course.dao;
 import com.github.pagehelper.Page;
 import com.github.pagehelper.PageHelper;
 import com.xuecheng.framework.domain.course.CourseBase;
+import com.xuecheng.framework.domain.course.CourseMarket;
 import com.xuecheng.framework.domain.course.Teachplan;
 import com.xuecheng.framework.domain.course.ext.CategoryNode;
 import com.xuecheng.framework.domain.course.ext.TeachplanNode;
@@ -14,6 +15,8 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import javax.sound.midi.Soundbank;
+import javax.xml.crypto.Data;
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
@@ -37,6 +40,12 @@ public class TestDao {
 
     @Autowired
     CategoryMapper categoryMapper;
+
+    @Autowired
+    CourseMarketRepository courseMarketRepository;
+
+    @Autowired
+    CourseMarketMapper courseMarketMapper;
     @Test
     public void testCourseBaseRepository(){
         Optional<CourseBase> optional = courseBaseRepository.findById("402885816240d276016240f7e5000002");
@@ -106,6 +115,35 @@ public class TestDao {
         courseBase.setDescription("String");
         CourseBase save = courseBaseRepository.save(courseBase);
         System.out.println(save);
+    }
+
+    @Test
+    public void testAddCourseMarket(){
+        Optional<CourseMarket> optional = courseMarketRepository.findById("297e7c7c62b888f00162b8a7dec20000");
+        if (optional.isPresent()){
+            CourseMarket courseMarket = optional.get();
+            System.out.println(courseMarket);
+        }
+    }
+    @Test
+    public void testfindById(){
+        CourseMarket market = courseMarketMapper.findById("0123");
+        System.out.println(market);
+    }
+
+    @Test
+    public void testSave(){
+        CourseMarket courseMarket = new CourseMarket();
+
+        courseMarket.setQq("6666");
+        courseMarket.setCharge("charge");
+        courseMarket.setValid("valid");
+        Date date = new Date(2018-05-2);
+        courseMarket.setExpires(date);
+
+        courseMarket.setId("402885816240d276016241019be70004");
+        courseMarketRepository.save(courseMarket);
+
     }
 
 }

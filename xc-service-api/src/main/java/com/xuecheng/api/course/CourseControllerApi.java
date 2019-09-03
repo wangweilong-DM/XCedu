@@ -1,6 +1,7 @@
 package com.xuecheng.api.course;
 
 import com.xuecheng.framework.domain.course.CourseBase;
+import com.xuecheng.framework.domain.course.CourseMarket;
 import com.xuecheng.framework.domain.course.Teachplan;
 import com.xuecheng.framework.domain.course.ext.CourseInfo;
 import com.xuecheng.framework.domain.course.ext.TeachplanNode;
@@ -37,4 +38,10 @@ public interface CourseControllerApi{
 
     @ApiOperation("修改课程信息")
     public ResponseResult updateCourseBase(String id,CourseBase courseBase);
+
+    @ApiOperation("根据id获取课程营销信息")
+    public CourseMarket getCourseMarketById(String courseId);
+
+    @ApiOperation("修改课程营销信息")
+    public ResponseResult updateCourseMarket(String courseId, CourseMarket courseMarket);
 }
