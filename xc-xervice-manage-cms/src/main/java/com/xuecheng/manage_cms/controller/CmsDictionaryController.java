@@ -1,7 +1,7 @@
 package com.xuecheng.manage_cms.controller;
 
-import com.xuecheng.api.cms.CmsConfigControllerApi;
-import com.xuecheng.framework.domain.cms.CmsConfig;
+import com.xuecheng.api.cms.SysDicthinaryControllerApi;
+import com.xuecheng.framework.domain.system.SysDictionary;
 import com.xuecheng.manage_cms.service.ConfigService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -11,19 +11,18 @@ import org.springframework.web.bind.annotation.RestController;
 
 /**
  * @author Wang
- * @date 2019/8/25 19:48
+ * @Version 1.0
+ * @date 2019/9/3 8:33
  */
 @RestController
-@RequestMapping("cms/config")
-public class CmsConfigController implements CmsConfigControllerApi{
-
+@RequestMapping("sys")
+public class CmsDictionaryController implements SysDicthinaryControllerApi {
     @Autowired
     ConfigService configService;
 
-
     @Override
-    @GetMapping("/getmodel/{id}")
-    public CmsConfig getModel(@PathVariable("id") String id) {
-        return configService.fingById(id);
+    @GetMapping("/dictionary/get/{dtype}")
+    public SysDictionary getByType(@PathVariable("dtype") String type) {
+        return configService.getByType(type);
     }
 }

@@ -1,12 +1,16 @@
 package com.xuecheng.manage_course.dao;
 
+import com.github.pagehelper.Page;
+import com.github.pagehelper.PageHelper;
 import com.xuecheng.framework.domain.course.CourseBase;
 import com.xuecheng.framework.domain.course.Teachplan;
+import com.xuecheng.framework.domain.course.ext.CategoryNode;
 import com.xuecheng.framework.domain.course.ext.TeachplanNode;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+
 import org.springframework.test.context.junit4.SpringRunner;
 
 import javax.sound.midi.Soundbank;
@@ -30,6 +34,9 @@ public class TestDao {
 
     @Autowired
     TeachplanRepository teachplanRepository;
+
+    @Autowired
+    CategoryMapper categoryMapper;
     @Test
     public void testCourseBaseRepository(){
         Optional<CourseBase> optional = courseBaseRepository.findById("402885816240d276016240f7e5000002");
@@ -70,4 +77,35 @@ public class TestDao {
         teachplan.setStatus("0");
         Teachplan save = teachplanRepository.save(teachplan);
     }
+
+    @Test
+    public void testfindByPage(){
+
+       // CourseBase courseBaseById = courseMapper.findCourseBaseById("297e7c7c62b888f00162b8a7dec20000");
+       // System.out.println(courseBaseById);
+
+        PageHelper.startPage(1,5);  //查询第一页，每页显示10条数据
+
+     //   CourseListRequest courseListRequest = new CourseListRequest();
+        Page<CourseBase> courseList = courseMapper.findCourseList();
+        List<CourseBase> result = courseList.getResult();
+        System.out.println(result);
+    }
+
+    @Test
+    public void testFindList(){
+        CategoryNode categoryList = categoryMapper.findCategoryList();
+
+        System.out.println(categoryList);
+    }
+
+    @Test
+    public void testAdd(){
+        CourseBase courseBase = new CourseBase();
+        courseBase.setCompanyId("sssss");
+        courseBase.setDescription("String");
+        CourseBase save = courseBaseRepository.save(courseBase);
+        System.out.println(save);
+    }
+
 }

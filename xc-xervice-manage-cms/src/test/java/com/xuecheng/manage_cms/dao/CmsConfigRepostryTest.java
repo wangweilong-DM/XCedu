@@ -1,6 +1,7 @@
 package com.xuecheng.manage_cms.dao;
 
 import com.xuecheng.framework.domain.cms.CmsConfig;
+import com.xuecheng.framework.domain.cms.SysDictionary;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runner.Runner;
@@ -17,6 +18,8 @@ import java.util.Optional;
 @SpringBootTest
 @RunWith(SpringRunner.class)
 public class CmsConfigRepostryTest {
+    @Autowired
+    SysDictionaryRepostry sysDictionaryRepostry;
 
     @Autowired
     CmsConfigRepostry cmsConfigRepostry;
@@ -28,6 +31,13 @@ public class CmsConfigRepostryTest {
             CmsConfig cmsConfig = optional.get();
             System.out.println(cmsConfig);
         }
+
+    }
+
+    @Test
+    public void testFindByType(){
+        com.xuecheng.framework.domain.system.SysDictionary byDType = sysDictionaryRepostry.findByDType("100");
+        System.out.println(byDType);
 
     }
 }

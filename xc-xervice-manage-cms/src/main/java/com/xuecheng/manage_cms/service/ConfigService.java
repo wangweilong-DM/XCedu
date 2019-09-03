@@ -7,11 +7,13 @@ import com.xuecheng.framework.domain.cms.CmsConfig;
 import com.xuecheng.framework.domain.cms.CmsPage;
 import com.xuecheng.framework.domain.cms.CmsTemplate;
 import com.xuecheng.framework.domain.cms.response.CmsCode;
+import com.xuecheng.framework.domain.system.SysDictionary;
 import com.xuecheng.framework.exception.ExceptionCast;
 import com.xuecheng.framework.model.response.CommonCode;
 import com.xuecheng.framework.model.response.QueryResponseResult;
 import com.xuecheng.manage_cms.dao.CmsConfigRepostry;
 import com.xuecheng.manage_cms.dao.CmsTemplateRepository;
+import com.xuecheng.manage_cms.dao.SysDictionaryRepostry;
 import freemarker.cache.StringTemplateLoader;
 import freemarker.template.Configuration;
 import freemarker.template.Template;
@@ -57,6 +59,9 @@ public class ConfigService {
 
     @Autowired
     GridFSBucket gridFSBucket;
+
+    @Autowired
+    SysDictionaryRepostry sysDictionaryRepostry;
 
 
     /**
@@ -186,5 +191,14 @@ public class ConfigService {
             e.printStackTrace();
         }
         return null;
+    }
+
+    public SysDictionary getByType(String type) {
+        SysDictionary dictionary = sysDictionaryRepostry.findByDType(type);
+        if (StringUtils.isEmpty(dictionary)){
+            ExceptionCast.cast(CmsCode.SYS_DICTIONARY_ERROE);
+        }
+        return dictionary;
+
     }
 }

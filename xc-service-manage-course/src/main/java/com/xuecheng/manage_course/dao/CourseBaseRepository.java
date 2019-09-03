@@ -11,4 +11,5 @@ import java.util.List;
  */
 public interface CourseBaseRepository extends JpaRepository<CourseBase,String> {
 
+
 }
