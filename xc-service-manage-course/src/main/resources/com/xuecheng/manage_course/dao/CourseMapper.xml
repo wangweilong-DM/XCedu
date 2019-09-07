@@ -13,4 +13,14 @@ SELECT
 FROM
 	`course_base`
     </select>
+
+    <select id="findCourseListAndPic" resultType="com.xuecheng.framework.domain.course.CourseOff">
+SELECT
+	a.*,
+	b.pic
+FROM
+	`course_base` a
+	LEFT JOIN course_pic b ON a.id = b.courseid
+    </select>
+
 </mapper>

@@ -2,14 +2,14 @@ package com.xuecheng.manage_course.service;
 
 import com.github.pagehelper.Page;
 import com.github.pagehelper.PageHelper;
-import com.xuecheng.framework.domain.course.CourseBase;
-import com.xuecheng.framework.domain.course.CourseMarket;
-import com.xuecheng.framework.domain.course.Teachplan;
+import com.xuecheng.framework.domain.course.*;
 import com.xuecheng.framework.domain.course.ext.CategoryNode;
 import com.xuecheng.framework.domain.course.ext.TeachplanNode;
 import com.xuecheng.framework.domain.course.request.CourseListRequest;
 import com.xuecheng.framework.domain.course.response.AddCourseResult;
 import com.xuecheng.framework.domain.course.response.CourseCode;
+import com.xuecheng.framework.domain.filesystem.FileSystem;
+import com.xuecheng.framework.domain.filesystem.response.FileSystemCode;
 import com.xuecheng.framework.exception.ExceptionCast;
 import com.xuecheng.framework.model.response.CommonCode;
 import com.xuecheng.framework.model.response.QueryResponseResult;
@@ -55,6 +55,12 @@ public class CourseService {
 
     @Autowired
     CourseMarketMapper courseMarketMapper;
+
+    @Autowired
+    FileSystemRepository fileSystemRepository;
+
+    @Autowired
+    CoursePicRepository coursePicRepository;
 
     /**
      * 课程计划查询
@@ -154,11 +160,24 @@ public class CourseService {
         return teachplan.getId();
     }
 
+    @Transactional
     public QueryResponseResult findCourseList(int page, int size, CourseListRequest courseListRequest) {
         PageHelper.startPage(page, size);
-        Page<CourseBase> courseList = courseMapper.findCourseList();
-        List<CourseBase> result = courseList.getResult();
-        long total = courseList.getTotal();
+        // Page<CourseBase> courseList = courseMapper.findCourseList();
+        Page<CourseOff> courseOffs = courseMapper.findCourseListAndPic();
+        List<CourseOff> result = courseOffs.getResult();
+
+        for (CourseOff res : result) {
+            String pic = res.getPic();
+            if (pic!= null){
+                String substring = pic.substring(pic.indexOf("/") + 1);
+                res.setPic(substring);
+            }
+
+        }
+        // List<CourseBase> result = courseList.getResult();
+        long total = courseOffs.getTotal();
+        // long total = courseList.getTotal();
         QueryResult queryResult = new QueryResult();
         queryResult.setList(result);
         queryResult.setTotal(total);
@@ -252,14 +271,60 @@ public class CourseService {
             courseMarketById.setQq(courseMarket.getQq());
             courseMarketById.setStartTime(courseMarket.getStartTime());
             courseMarketRepository.save(courseMarketById);
-        }else {
+        } else {
             courseMarketById = new CourseMarket();
-            BeanUtils.copyProperties(courseMarket,courseMarketById);
+            BeanUtils.copyProperties(courseMarket, courseMarketById);
             courseMarketById.setId(courseId);
             courseMarketRepository.save(courseMarketById);
         }
 
         ResponseResult responseResult = new ResponseResult(CommonCode.SUCCESS);
         return responseResult;
+    }
+
+    public ResponseResult addCoursePic(String courseId, String pic) {
+
+        CoursePic coursePic = new CoursePic();
+        coursePic.setCourseid(courseId);
+        coursePic.setPic(pic);
+        CoursePic save = coursePicRepository.save(coursePic);
+        ResponseResult responseResult = new ResponseResult(CommonCode.SUCCESS);
+
+        return responseResult;
+    }
+
+    public CoursePic findCoursePic(String courseId) {
+
+        if (StringUtils.isEmpty(courseId)) {
+            ExceptionCast.cast(CourseCode.COURSE_PUBLISH_COURSEIDISNULL);
+        }
+        Optional<CoursePic> optional = coursePicRepository.findById(courseId);
+        if (!optional.isPresent()) {
+            ExceptionCast.cast(CourseCode.COURSE_PUBLISH_COURSEIDISNULL);
+        }
+        CoursePic coursePic = optional.get();
+        String pic = coursePic.getPic();
+        String substring = pic.substring(pic.indexOf("/") + 1);
+        coursePic.setPic(substring);
+
+        return coursePic;
+    }
+
+    /**
+     * 删除图片
+     *
+     * @param courseId
+     * @return
+     */
+    @Transactional
+    public ResponseResult deleteCoursePic(String courseId) {
+
+        //如果rsult>0 ,那么删除成功
+        long result = coursePicRepository.deleteByCourseid(courseId);
+        if (result > 0) {
+            return new ResponseResult(CommonCode.SUCCESS);
+        }
+        return new ResponseResult(CommonCode.FAIL);
+
     }
 }

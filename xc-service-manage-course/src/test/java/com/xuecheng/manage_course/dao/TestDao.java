@@ -7,6 +7,7 @@ import com.xuecheng.framework.domain.course.CourseMarket;
 import com.xuecheng.framework.domain.course.Teachplan;
 import com.xuecheng.framework.domain.course.ext.CategoryNode;
 import com.xuecheng.framework.domain.course.ext.TeachplanNode;
+import io.swagger.annotations.ApiOperation;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -46,6 +47,9 @@ public class TestDao {
 
     @Autowired
     CourseMarketMapper courseMarketMapper;
+
+    @Autowired
+    CoursePicRepository coursePicRepository;
     @Test
     public void testCourseBaseRepository(){
         Optional<CourseBase> optional = courseBaseRepository.findById("402885816240d276016240f7e5000002");
@@ -145,5 +149,13 @@ public class TestDao {
         courseMarketRepository.save(courseMarket);
 
     }
+
+    @Test
+    public void testString(){
+        String s = "group1/M00/00/00/rBCc-l1yAKuAW0RoAAiygKrwlXM477.jpg";
+        String substring = s.substring(s.indexOf("/")+1);
+        System.out.println(substring);
+    }
+
 
 }
