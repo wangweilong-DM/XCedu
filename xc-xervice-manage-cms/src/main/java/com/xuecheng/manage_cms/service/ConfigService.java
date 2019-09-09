@@ -11,7 +11,9 @@ import com.xuecheng.framework.domain.system.SysDictionary;
 import com.xuecheng.framework.exception.ExceptionCast;
 import com.xuecheng.framework.model.response.CommonCode;
 import com.xuecheng.framework.model.response.QueryResponseResult;
+import com.xuecheng.manage_cms.client.CmsPageClient;
 import com.xuecheng.manage_cms.dao.CmsConfigRepostry;
+import com.xuecheng.manage_cms.dao.CmsPageRepostry;
 import com.xuecheng.manage_cms.dao.CmsTemplateRepository;
 import com.xuecheng.manage_cms.dao.SysDictionaryRepostry;
 import freemarker.cache.StringTemplateLoader;
@@ -20,6 +22,7 @@ import freemarker.template.Template;
 import org.apache.commons.io.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import org.springframework.cglib.beans.BeanMap;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.gridfs.GridFsResource;
@@ -43,6 +46,9 @@ import java.util.Optional;
 public class ConfigService {
 
     @Autowired
+    CmsPageRepostry cmsPageRepostry;
+
+    @Autowired
     CmsConfigRepostry cmsConfigRepostry;
 
     @Autowired
@@ -62,6 +68,9 @@ public class ConfigService {
 
     @Autowired
     SysDictionaryRepostry sysDictionaryRepostry;
+
+    @Autowired
+    CmsPageClient cmsPageClient;
 
 
     /**
@@ -95,7 +104,8 @@ public class ConfigService {
      * 执行页面静态化
      */
     public String getPageHtml(String pageId) {
-        Map model = getModelByPageId(pageId);
+
+        Map model = getModelByPageId2(pageId);
         if (model == null) {
             //数据模型获取不到
             ExceptionCast.cast(CmsCode.CMS_GENERATEHTML_DATAISNULL);
@@ -110,6 +120,17 @@ public class ConfigService {
         //执行页面静态化
         String html = generationHtml(template, model);
         return html;
+    }
+
+    //远程调用cmsconfig 通过beanMap转换成map对象
+    private Map getModelByPageId2(String pageId){
+        Optional<CmsPage> optional = cmsPageRepostry.findById(pageId);
+        CmsPage cmsPage = optional.get();
+        String dataUrl = cmsPage.getDataUrl();
+        String substring = dataUrl.substring(dataUrl.lastIndexOf("/" )+ 1);
+        CmsConfig model = cmsPageClient.getModel(substring);
+        BeanMap beanMap = BeanMap.create(model);
+        return beanMap;
     }
 
     //获取数据模型

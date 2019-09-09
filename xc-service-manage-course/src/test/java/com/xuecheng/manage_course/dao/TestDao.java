@@ -2,11 +2,13 @@ package com.xuecheng.manage_course.dao;
 
 import com.github.pagehelper.Page;
 import com.github.pagehelper.PageHelper;
+import com.xuecheng.framework.domain.cms.CmsPage;
 import com.xuecheng.framework.domain.course.CourseBase;
 import com.xuecheng.framework.domain.course.CourseMarket;
 import com.xuecheng.framework.domain.course.Teachplan;
 import com.xuecheng.framework.domain.course.ext.CategoryNode;
 import com.xuecheng.framework.domain.course.ext.TeachplanNode;
+import com.xuecheng.manage_course.client.CmsPageClient;
 import io.swagger.annotations.ApiOperation;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -50,6 +52,9 @@ public class TestDao {
 
     @Autowired
     CoursePicRepository coursePicRepository;
+
+    @Autowired
+    CmsPageClient cmsPageClient;
     @Test
     public void testCourseBaseRepository(){
         Optional<CourseBase> optional = courseBaseRepository.findById("402885816240d276016240f7e5000002");
@@ -156,6 +161,14 @@ public class TestDao {
         String substring = s.substring(s.indexOf("/")+1);
         System.out.println(substring);
     }
+
+
+
+@Test
+    public void  testFeign(){
+    CmsPage cmsPage = cmsPageClient.findById("5d5c93bca8d3fb36dcd604e2");
+    System.out.println(cmsPage);
+}
 
 
 }

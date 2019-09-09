@@ -1,5 +1,7 @@
 package com.xuecheng.manage_cms.dao;
 
+import com.xuecheng.framework.domain.cms.CmsConfig;
+import com.xuecheng.framework.domain.cms.CmsConfigModel;
 import com.xuecheng.framework.domain.cms.CmsPage;
 import com.xuecheng.framework.domain.cms.CmsSite;
 import com.xuecheng.manage_cms.service.ConfigService;
@@ -13,6 +15,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.util.StringUtils;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 /**
@@ -23,6 +26,8 @@ import java.util.Optional;
 @RunWith(SpringRunner.class)
 public class CmsPageRepostryTest {
 
+    @Autowired
+    CmsConfigRepostry cmsConfigRepostry;
 
     @Autowired
     CmsPageRepostry cmsPageRepostry;
@@ -136,6 +141,12 @@ public class CmsPageRepostryTest {
             cmsSite.setSitePhysicalPath("cmsfiles");
             CmsSite save = cmsSiteRepostry.save(cmsSite);
         }
-
+    }
+    @Test
+    public  void  test(){
+        Optional<CmsConfig> optional = cmsConfigRepostry.findById("5a791725dd573c3574ee333f");
+        CmsConfig cmsConfig = optional.get();
+        List model =cmsConfig.getModel();
+        System.out.println(model);
     }
 }
