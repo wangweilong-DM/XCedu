@@ -4,6 +4,7 @@ import com.xuecheng.framework.domain.cms.CmsConfig;
 import com.xuecheng.framework.domain.cms.CmsConfigModel;
 import com.xuecheng.framework.domain.cms.CmsPage;
 import com.xuecheng.framework.domain.cms.CmsSite;
+import com.xuecheng.manage_cms.client.CmsPageClient;
 import com.xuecheng.manage_cms.service.ConfigService;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -37,6 +38,11 @@ public class CmsPageRepostryTest {
 
     @Autowired
     CmsSiteRepostry cmsSiteRepostry;
+
+    @Autowired
+    CmsPageClient cmsPageClient;
+
+
 
     @Test
     public void testFindAll(){
@@ -148,5 +154,11 @@ public class CmsPageRepostryTest {
         CmsConfig cmsConfig = optional.get();
         List model =cmsConfig.getModel();
         System.out.println(model);
+    }
+
+    @Test
+    public  void testfing(){
+
+
     }
 }

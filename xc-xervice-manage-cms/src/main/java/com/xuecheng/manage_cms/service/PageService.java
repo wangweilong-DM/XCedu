@@ -9,6 +9,7 @@ import com.xuecheng.framework.domain.cms.response.CmsPageResult;
 import com.xuecheng.framework.domain.course.CourseBase;
 import com.xuecheng.framework.exception.ExceptionCast;
 import com.xuecheng.framework.model.response.*;
+import com.xuecheng.manage_cms.client.CourseClient;
 import com.xuecheng.manage_cms.config.RabbitmqConfig;
 import com.xuecheng.manage_cms.dao.CmsPageRepostry;
 import org.apache.commons.io.IOUtils;
@@ -48,6 +49,9 @@ public class PageService {
 
     @Autowired
     RabbitTemplate rabbitTemplate;
+
+    @Autowired
+    CourseClient courseClient;
 
     /**
      * 自定义查询页面方法
@@ -210,22 +214,15 @@ public class PageService {
             byId.setPageWebPath(cmsPage.getPageWebPath());
             byId.setPagePhysicalPath(cmsPage.getPagePhysicalPath());
             byId.setDataUrl(cmsPage.getDataUrl());
-        }
 
-           // byId.setPageCreateTime(cmsPage.getPageCreateTime());
-           // byId.setPageType(cmsPage.getPageType());
+            // byId.setPageCreateTime(cmsPage.getPageCreateTime());
+            // byId.setPageType(cmsPage.getPageType());
             //提交修改
             //如果页面名称、站点id、页面webpath已经存在，说明已经有这样的页面，无法修改
-            if (cmsPageRepostry.findByPageNameAndSiteIdAndPageWebPath(byId.getPageName(),byId.getSiteId(),byId.getPageWebPath()) != null){
-//                else new CmsPageResult(CommonCode.FAIL ,null);
-                ExceptionCast.cast(CmsCode.CMS_ADDPAGE_EXISTSNAME);
-            }
             CmsPage save = cmsPageRepostry.save(byId);
-            if (save != null) {
-                CmsPageResult cmsPageResult = new CmsPageResult(CommonCode.SUCCESS, save);
-                return cmsPageResult;
-            }
-
+            CmsPageResult cmsPageResult = new CmsPageResult(CommonCode.SUCCESS, save);
+            return  cmsPageResult;
+        }
              //修改失败
         return new CmsPageResult(CommonCode.FAIL, null);
     }
@@ -308,4 +305,16 @@ public class PageService {
         rabbitTemplate.convertAndSend(RabbitmqConfig.EX_ROUTING_CMS_POSTPAGE,siteId,jsonString);
     }
 
+    public CmsPageResult saveCmsPage(CmsPage cmsPage) {
+
+        CmsPage cmsPage1 = cmsPageRepostry.findByPageNameAndSiteIdAndPageWebPath(cmsPage.getPageName(), cmsPage.getSiteId(), cmsPage.getPageWebPath());
+        if (cmsPage1 != null){
+            //修改
+            CmsPageResult cmsPageResult = this.updatePage(cmsPage1.getPageId(), cmsPage);
+            return cmsPageResult;
+        }
+        CmsPage save = cmsPageRepostry.save(cmsPage);
+        CmsPageResult cmsPageResult = new CmsPageResult(CommonCode.SUCCESS,cmsPage);
+        return cmsPageResult;
+    }
 }

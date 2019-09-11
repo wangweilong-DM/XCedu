@@ -17,5 +17,6 @@ public class XcServiceList {
     public static final String XC_SERVICE_MANAGE_ORDER = "xc-service-manage_cms_client-order";
     public static final String XC_SERVICE_LEARNING = "xc-service-learning";
     public static final String XC_SERVICE_CMS = "xc-service-manage-cms";
+    public static final String XC_SERVICE_COURSE = "xc-service-manage-course";
 
 }

@@ -7,11 +7,13 @@ import com.xuecheng.framework.domain.cms.CmsConfig;
 import com.xuecheng.framework.domain.cms.CmsPage;
 import com.xuecheng.framework.domain.cms.CmsTemplate;
 import com.xuecheng.framework.domain.cms.response.CmsCode;
+import com.xuecheng.framework.domain.course.ext.CourseView;
 import com.xuecheng.framework.domain.system.SysDictionary;
 import com.xuecheng.framework.exception.ExceptionCast;
 import com.xuecheng.framework.model.response.CommonCode;
 import com.xuecheng.framework.model.response.QueryResponseResult;
 import com.xuecheng.manage_cms.client.CmsPageClient;
+import com.xuecheng.manage_cms.client.CourseClient;
 import com.xuecheng.manage_cms.dao.CmsConfigRepostry;
 import com.xuecheng.manage_cms.dao.CmsPageRepostry;
 import com.xuecheng.manage_cms.dao.CmsTemplateRepository;
@@ -35,6 +37,7 @@ import org.springframework.web.client.RestTemplate;
 import sun.nio.ch.IOUtil;
 
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
@@ -72,6 +75,11 @@ public class ConfigService {
     @Autowired
     CmsPageClient cmsPageClient;
 
+    @Autowired
+    CourseClient courseClient;
+
+
+
 
     /**
      * 根据id查询cms页面配置
@@ -104,8 +112,16 @@ public class ConfigService {
      * 执行页面静态化
      */
     public String getPageHtml(String pageId) {
-
-        Map model = getModelByPageId2(pageId);
+        String siteid = "5d761449a8d3fb2bf4eae392";
+        Optional<CmsPage> optional = cmsPageRepostry.findById(pageId);
+        CmsPage cmsPage = optional.get();
+        String siteId = cmsPage.getSiteId();
+        Map model = new HashMap();
+        if (siteId.equals(siteid)) {
+             model = getModelByPageId3(pageId);
+        }else {
+             model = getModelByPageId2(pageId);
+        }
         if (model == null) {
             //数据模型获取不到
             ExceptionCast.cast(CmsCode.CMS_GENERATEHTML_DATAISNULL);
@@ -123,11 +139,22 @@ public class ConfigService {
     }
 
     //远程调用cmsconfig 通过beanMap转换成map对象
-    private Map getModelByPageId2(String pageId){
+    private Map getModelByPageId3(String pageId) {
         Optional<CmsPage> optional = cmsPageRepostry.findById(pageId);
         CmsPage cmsPage = optional.get();
         String dataUrl = cmsPage.getDataUrl();
-        String substring = dataUrl.substring(dataUrl.lastIndexOf("/" )+ 1);
+        String substring = dataUrl.substring(dataUrl.lastIndexOf("/") + 1);
+        CourseView courseView = courseClient.courseView(substring);
+        BeanMap beanMap = BeanMap.create(courseView);
+        return beanMap;
+    }
+
+    //远程调用cmsconfig 通过beanMap转换成map对象
+    private Map getModelByPageId2(String pageId) {
+        Optional<CmsPage> optional = cmsPageRepostry.findById(pageId);
+        CmsPage cmsPage = optional.get();
+        String dataUrl = cmsPage.getDataUrl();
+        String substring = dataUrl.substring(dataUrl.lastIndexOf("/") + 1);
         CmsConfig model = cmsPageClient.getModel(substring);
         BeanMap beanMap = BeanMap.create(model);
         return beanMap;
@@ -216,7 +243,7 @@ public class ConfigService {
 
     public SysDictionary getByType(String type) {
         SysDictionary dictionary = sysDictionaryRepostry.findByDType(type);
-        if (StringUtils.isEmpty(dictionary)){
+        if (StringUtils.isEmpty(dictionary)) {
             ExceptionCast.cast(CmsCode.SYS_DICTIONARY_ERROE);
         }
         return dictionary;
