@@ -66,4 +66,6 @@ public interface CourseControllerApi{
     public CoursePublishResult preview(String courseId);
 
 
+    @ApiOperation("发布课程")
+    public CoursePublishResult publishCourse(String courseId);
 }

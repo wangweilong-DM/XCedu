@@ -6,12 +6,14 @@ import com.xuecheng.framework.domain.cms.CmsSite;
 import com.xuecheng.framework.domain.cms.request.QueryPageRequest;
 import com.xuecheng.framework.domain.cms.response.CmsCode;
 import com.xuecheng.framework.domain.cms.response.CmsPageResult;
+import com.xuecheng.framework.domain.cms.response.CmsPostPageResult;
 import com.xuecheng.framework.domain.course.CourseBase;
 import com.xuecheng.framework.exception.ExceptionCast;
 import com.xuecheng.framework.model.response.*;
 import com.xuecheng.manage_cms.client.CourseClient;
 import com.xuecheng.manage_cms.config.RabbitmqConfig;
 import com.xuecheng.manage_cms.dao.CmsPageRepostry;
+import com.xuecheng.manage_cms.dao.CmsSiteRepostry;
 import org.apache.commons.io.IOUtils;
 import org.bson.types.ObjectId;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
@@ -52,6 +54,8 @@ public class PageService {
 
     @Autowired
     CourseClient courseClient;
+    @Autowired
+    CmsSiteRepostry cmsSiteRepostry;
 
     /**
      * 自定义查询页面方法
@@ -156,7 +160,7 @@ public class PageService {
      * @return
      */
     public CmsPageResult addCmsPage(CmsPage cmsPage) {
-        if (cmsPage == null){
+        if (cmsPage == null) {
             //抛出异常，非法参数异常，指定异常信息的内容
             ExceptionCast.cast(CmsCode.CMS_GENERATEHTML_TEMPLATEISNULL);
         }
@@ -195,7 +199,6 @@ public class PageService {
     }
 
 
-
     /**
      * 修改页面
      *
@@ -221,29 +224,30 @@ public class PageService {
             //如果页面名称、站点id、页面webpath已经存在，说明已经有这样的页面，无法修改
             CmsPage save = cmsPageRepostry.save(byId);
             CmsPageResult cmsPageResult = new CmsPageResult(CommonCode.SUCCESS, save);
-            return  cmsPageResult;
+            return cmsPageResult;
         }
-             //修改失败
+        //修改失败
         return new CmsPageResult(CommonCode.FAIL, null);
     }
 
     /**
      * 根据页面id删除页面
+     *
      * @param id
      * @return
      */
-    public ResponseResult deleteCmsPage(String id){
+    public ResponseResult deleteCmsPage(String id) {
         Optional<CmsPage> optional = cmsPageRepostry.findById(id);
-        if (optional.isPresent()){
+        if (optional.isPresent()) {
             cmsPageRepostry.deleteById(id);
             ResponseResult responseResult = new ResponseResult(CommonCode.SUCCESS);
             return responseResult;
         }
-       return new ResponseResult(CommonCode.FAIL);
+        return new ResponseResult(CommonCode.FAIL);
     }
 
-    public ResponseResult post(String pageId){
-//1.执行页面静态化
+    public ResponseResult post(String pageId) {
+          //1.执行页面静态化
         String pageHtml = configService.getPageHtml(pageId);
         // 2.将页面静态化文件存储到GridFs中
         CmsPage cmsPage = savaHtml(pageId, pageHtml);
@@ -255,25 +259,25 @@ public class PageService {
     }
 
     //保存静态文件内容
-    private CmsPage savaHtml(String pageId , String html){
+    private CmsPage savaHtml(String pageId, String html) {
         //1.查询页面
         Optional<CmsPage> optional = cmsPageRepostry.findById(pageId);
-        if (!optional.isPresent()){
+        if (!optional.isPresent()) {
             ExceptionCast.cast(CmsCode.CMS_PAGE_NOTEXISTS);
         }
         CmsPage cmsPage = optional.get();
         //2.存之前先删除页面
         String fileId = cmsPage.getHtmlFileId();
-        if (StringUtils.isEmpty(fileId)){
+        if (StringUtils.isEmpty(fileId)) {
 
-        }else {
+        } else {
             gridFsTemplate.delete(Query.query(Criteria.where("_id").is(fileId)));
         }
         //3.保存html文件到gridfs
         InputStream inputStream = null;
         ObjectId objectId = null;
         try {
-            inputStream = IOUtils.toInputStream(html,"utf-8");
+            inputStream = IOUtils.toInputStream(html, "utf-8");
             objectId = gridFsTemplate.store(inputStream, cmsPage.getPageName());
         } catch (IOException e) {
             e.printStackTrace();
@@ -285,11 +289,11 @@ public class PageService {
     }
 
     //向mq发送消息
-    private void sendPostPage(String pageId){
+    private void sendPostPage(String pageId) {
 
         //得到页面信息
         Optional<CmsPage> optional = cmsPageRepostry.findById(pageId);
-        if (!optional.isPresent()){
+        if (!optional.isPresent()) {
             ExceptionCast.cast(CmsCode.CMS_PAGE_NOTEXISTS);
         }
         CmsPage cmsPage = optional.get();
@@ -298,23 +302,47 @@ public class PageService {
         String siteId = cmsPage.getSiteId();
 
         //拼装消息对象
-        Map<String,String> map = new HashMap<>();
-        map.put("pageId",pageId);
+        Map<String, String> map = new HashMap<>();
+        map.put("pageId", pageId);
         //转成json串
         String jsonString = JSON.toJSONString(map);
-        rabbitTemplate.convertAndSend(RabbitmqConfig.EX_ROUTING_CMS_POSTPAGE,siteId,jsonString);
+        rabbitTemplate.convertAndSend(RabbitmqConfig.EX_ROUTING_CMS_POSTPAGE, siteId, jsonString);
     }
 
     public CmsPageResult saveCmsPage(CmsPage cmsPage) {
 
         CmsPage cmsPage1 = cmsPageRepostry.findByPageNameAndSiteIdAndPageWebPath(cmsPage.getPageName(), cmsPage.getSiteId(), cmsPage.getPageWebPath());
-        if (cmsPage1 != null){
+        if (cmsPage1 != null) {
             //修改
             CmsPageResult cmsPageResult = this.updatePage(cmsPage1.getPageId(), cmsPage);
             return cmsPageResult;
         }
         CmsPage save = cmsPageRepostry.save(cmsPage);
-        CmsPageResult cmsPageResult = new CmsPageResult(CommonCode.SUCCESS,cmsPage);
+        CmsPageResult cmsPageResult = new CmsPageResult(CommonCode.SUCCESS, cmsPage);
         return cmsPageResult;
+    }
+
+    /**
+     * 一键发布页面
+     * @param cmsPage
+     * @return
+     */
+    public CmsPostPageResult postPageQuick(CmsPage cmsPage) {
+        CmsPageResult cmsPageResult = this.saveCmsPage(cmsPage);
+        //将页面信息存储到cms_page集合中
+        if (!cmsPageResult.isSuccess()) {
+            ExceptionCast.cast(CommonCode.FAIL);
+        }
+        //执行页面发布，(先静态化，保存到GridFs，向MQ发送消息)
+        ResponseResult post = this.post(cmsPageResult.getCmsPage().getPageId());
+        if (!post.isSuccess()){
+            ExceptionCast.cast(CommonCode.FAIL);
+        }
+        CmsPage one = cmsPageResult.getCmsPage();
+        Optional<CmsSite> optional = cmsSiteRepostry.findById(one.getSiteId());
+        CmsSite cmsSite = optional.get();
+        String dataUrl = cmsSite.getSiteDomain()+cmsSite.getSiteWebPath()+one.getPageWebPath()+one.getPageName();
+        CmsPostPageResult cmsPostPageResult = new CmsPostPageResult(CommonCode.SUCCESS,dataUrl);
+        return cmsPostPageResult;
     }
 }

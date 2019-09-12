@@ -112,6 +112,11 @@ public class CourseController implements CourseControllerApi{
         return courseService.preview(courseId);
     }
 
+    @Override
+    @PostMapping("/publish/{courseId}")
+    public CoursePublishResult publishCourse(@PathVariable("courseId") String courseId) {
+        return courseService.publishCourse(courseId);
+    }
 
 
 }

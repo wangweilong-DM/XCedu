@@ -17,6 +17,7 @@
         <option value="$PROJECT_DIR$/test-rabbitmq-consumer/pom.xml" />
         <option value="$PROJECT_DIR$/test-rabbitmq-producer/pom.xml" />
         <option value="$PROJECT_DIR$/test-freemarker/pom.xml" />
+        <option value="$PROJECT_DIR$/xc-service-search/pom.xml" />
       </list>
     </option>
   </component>

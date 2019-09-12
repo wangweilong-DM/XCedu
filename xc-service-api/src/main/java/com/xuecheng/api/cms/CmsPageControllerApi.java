@@ -3,6 +3,7 @@ package com.xuecheng.api.cms;
 import com.xuecheng.framework.domain.cms.CmsPage;
 import com.xuecheng.framework.domain.cms.request.QueryPageRequest;
 import com.xuecheng.framework.domain.cms.response.CmsPageResult;
+import com.xuecheng.framework.domain.cms.response.CmsPostPageResult;
 import com.xuecheng.framework.domain.course.CourseBase;
 import com.xuecheng.framework.model.response.QueryResponseResult;
 import com.xuecheng.framework.model.response.ResponseResult;
@@ -10,6 +11,7 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
+import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * @author Wang
@@ -54,5 +56,8 @@ public interface CmsPageControllerApi {
 
     @ApiOperation("保存页面")
     public CmsPageResult saveCmsPage(CmsPage cmsPage);
+
+    @ApiOperation("一键发布页面")
+    public CmsPostPageResult postPageQuick(CmsPage cmsPage);
 
 }
